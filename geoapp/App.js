@@ -1,26 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList } from 'react-native';
-import { saveLocation, getLocations, clearLocations } from './utils/storage';
-
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { saveLocation, getLocations, clearLocations } from './async/storage';  // Updated import path
 
 export default function App() {
   const [locations, setLocations] = useState([]);
@@ -41,7 +22,9 @@ export default function App() {
   };
 
   return (
-    <View style={{ padding: 20 }}>
+    <View style={styles.container}>
+      <Text>Open up App.js to start working on your app!</Text>
+      <StatusBar style="auto" />
       <Button title="Save Location" onPress={addNewLocation} />
       <Button title="Clear Locations" onPress={async () => { await clearLocations(); setLocations([]); }} />
       <FlatList
@@ -52,3 +35,12 @@ export default function App() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
