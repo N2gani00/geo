@@ -1,35 +1,32 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Save a new location
-export const saveLocation = async (location) => {
-  try {
-    const storedLocations = await AsyncStorage.getItem('@saved_locations');
-    const locations = storedLocations ? JSON.parse(storedLocations) : [];
-    locations.push(location);
-    await AsyncStorage.setItem('@saved_locations', JSON.stringify(locations));
-    console.log('Location saved!');
-  } catch (e) {
-    console.error('Failed to save location:', e);
-  }
-};
-
-// Get all saved locations
+// Function to get locations from AsyncStorage
 export const getLocations = async () => {
   try {
-    const storedLocations = await AsyncStorage.getItem('@saved_locations');
-    return storedLocations ? JSON.parse(storedLocations) : [];
+    const jsonValue = await AsyncStorage.getItem('locations');
+    return jsonValue != null ? JSON.parse(jsonValue) : [];
   } catch (e) {
-    console.error('Failed to fetch locations:', e);
+    console.error("Error reading locations:", e);
     return [];
   }
 };
 
-// Remove all locations
+// Function to save a new location
+export const saveLocation = async (newLocation) => {
+  try {
+    const locations = await getLocations(); // Get existing locations
+    locations.push(newLocation); // Add new location
+    await AsyncStorage.setItem('locations', JSON.stringify(locations));
+  } catch (e) {
+    console.error("Error saving location:", e);
+  }
+};
+
+// Function to clear all locations
 export const clearLocations = async () => {
   try {
-    await AsyncStorage.removeItem('@saved_locations');
-    console.log('All locations cleared!');
+    await AsyncStorage.removeItem('locations');
   } catch (e) {
-    console.error('Failed to clear locations:', e);
+    console.error("Error clearing locations:", e);
   }
 };
