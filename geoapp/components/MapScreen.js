@@ -1,96 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, Platform, Button } from 'react-native';
+import { View, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as geocoding from 'expo-location'; // Geocode the name
 
-const MapScreen = () => {
-  const [region, setRegion] = useState(null);
-  const [markers, setMarkers] = useState([]);
+const MapScreen = ({ route }) => {
+  const { locationName } = route.params || {};
 
-  // Load saved markers and user location when the screen opens
+  const [region, setRegion] = useState({
+    latitude: 60.1699, // Default to Helsinki
+    longitude: 24.9384,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
+
   useEffect(() => {
-    if (Platform.OS === 'web') return;
-
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required.');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-
-      // Load saved markers
-      const storedMarkers = await AsyncStorage.getItem('markers');
-      if (storedMarkers) {
-        setMarkers(JSON.parse(storedMarkers));
-      }
-    })();
-  }, []);
-
-  
-  const addMarker = async (event) => {
-    const newMarker = {
-      latitude: event.nativeEvent.coordinate.latitude,
-      longitude: event.nativeEvent.coordinate.longitude,
-      title: `Marker ${markers.length + 1}`, // Placeholder name
-    };
-
-    const updatedMarkers = [...markers, newMarker];
-
-    setMarkers(updatedMarkers);
-    await AsyncStorage.setItem('markers', JSON.stringify(updatedMarkers));
-  };
-
-  // Function to clear all markers
-  const clearMarkers = async () => {
-    await AsyncStorage.removeItem('markers');
-    setMarkers([]);
-  };
-
-  if (Platform.OS === 'web') {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>
-          🌍 Map is not available on web. Please use the mobile app.
-        </Text>
-      </View>
-    );
-  }
+    if (locationName) {
+      (async () => {
+        try {
+          let geoResults = await geocoding.geocodeAsync(locationName);
+          if (geoResults.length > 0) {
+            const { latitude, longitude } = geoResults[0];
+            setRegion({ latitude, longitude, latitudeDelta: 0.05, longitudeDelta: 0.05 });
+          } else {
+            Alert.alert("Location Not Found", "Unable to find coordinates for this location.");
+          }
+        } catch (error) {
+          console.error("Geocoding Error:", error);
+        }
+      })();
+    }
+  }, [locationName]);
 
   return (
-    <View style={styles.container}>
-      {region && (
-        <>
-          <MapView style={styles.map} initialRegion={region} onPress={addMarker}>
-            {markers.map((marker, index) => (
-              <Marker
-                key={index}
-                coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
-                title={marker.title}
-              />
-            ))}
-          </MapView>
-          {markers.length > 0 && (
-            <Button title="Clear Markers" onPress={clearMarkers}/>
-          )}
-        </>
-      )}
+    <View style={{ flex: 1 }}>
+      <MapView style={{ flex: 1 }} region={region}>
+        <Marker coordinate={{ latitude: region.latitude, longitude: region.longitude }} title={locationName} />
+      </MapView>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, },
-  errorText: { fontSize: 18, color: 'red', textAlign: 'center', padding: 20 },
-  map: { width: '100%', height: '90%' },
-});
 
 export default MapScreen;

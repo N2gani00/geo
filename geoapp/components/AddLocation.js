@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddLocation = ({ navigation }) => {
@@ -13,7 +13,11 @@ const AddLocation = ({ navigation }) => {
       return;
     }
 
-    const newLocation = { name, description, rating };
+    const newLocation = { 
+      name, 
+      description: description || "No description provided", 
+      rating: Number(rating) 
+    };
 
     try {
       const storedLocations = await AsyncStorage.getItem('locations');
@@ -37,12 +41,12 @@ const AddLocation = ({ navigation }) => {
       <Text style={styles.label}>Rating (1-5)</Text>
       <View style={styles.ratingContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
-          <Button
-            key={star}
-            title={star.toString()}
-            onPress={() => setRating(star)} // Set the rating when a star is selected
-            color={rating >= star ? 'gold' : 'gray'} // Highlight the selected rating
-          />
+          <TouchableOpacity 
+            key={star} 
+            onPress={() => setRating(star)}
+            style={[styles.star, rating >= star && styles.selectedStar]}>
+            <Text style={styles.starText}>{star}</Text>
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -56,6 +60,9 @@ const styles = StyleSheet.create({
   label: { fontSize: 16, fontWeight: "bold", marginTop: 10 },
   input: { borderWidth: 1, padding: 10, marginTop: 5, borderRadius: 5 },
   ratingContainer: { flexDirection: 'row', marginTop: 10, justifyContent: 'space-around' },
+  star: { padding: 10, borderRadius: 5 },
+  selectedStar: { backgroundColor: 'gold' },
+  starText: { fontSize: 20, color: 'black' },
 });
 
 export default AddLocation;

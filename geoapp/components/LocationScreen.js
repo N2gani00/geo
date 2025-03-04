@@ -51,23 +51,27 @@ const LocationsScreen = ({ navigation }) => {
               <Text style={styles.locationName}>{item.name} ⭐ {item.rating}</Text>
               <Text style={styles.description}>{item.description}</Text>
             </View>
-            <Text style={styles.pinIcon}>📍</Text> 
+            
+            {/* 📍 Make pin clickable to navigate to Map */}
+            <TouchableOpacity 
+              onPress={() => navigation.navigate("Map", { locationName: item.name })} 
+            >
+              <Text style={styles.pinIcon}>📍</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => deleteLocation(index)}>
               <Text style={styles.deleteText}>🗑️</Text>
             </TouchableOpacity>
           </View>
         )}
       />
-
-      <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("Add Location")}>
-        <Text style={styles.addButtonText}>+ Add Location</Text>
-      </TouchableOpacity>
     </View>
+    
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, paddingTop: 40, },
+  container: { flex: 1, padding: 20, paddingTop: 40 },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
   locationItem: { 
     flexDirection: "row", 
@@ -79,10 +83,11 @@ const styles = StyleSheet.create({
   textContainer: { flex: 1 },
   locationName: { fontSize: 18, fontWeight: "bold" },
   description: { fontSize: 14, color: "gray" },
-  pinIcon: { fontSize: 20, marginRight: 10 }, // 📍 icon
-  deleteText: { fontSize: 20, marginLeft: 10, color: "black" }, // 🗑️ icon without background
+  pinIcon: { fontSize: 20, marginRight: 10 },
+  deleteText: { fontSize: 20, marginLeft: 10, color: "black" },
   addButton: { backgroundColor: "green", padding: 15, borderRadius: 5, marginTop: 20 },
   addButtonText: { color: "white", textAlign: "center", fontSize: 18 }
 });
+
 
 export default LocationsScreen;
